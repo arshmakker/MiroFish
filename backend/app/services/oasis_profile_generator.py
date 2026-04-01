@@ -1022,7 +1022,7 @@ class OasisProfileGenerator:
         
         output_lines = [
             f"\n{separator}",
-            f"[已生成] {entity_name} ({entity_type})",
+            t('progress.profileGenerated', name=entity_name, type=entity_type),
             f"{separator}",
             f"用户名: {profile.user_name}",
             f"",
