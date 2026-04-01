@@ -17,7 +17,7 @@ from ..config import Config
 from ..models.task import TaskManager, TaskStatus
 from ..utils.zep_paging import fetch_all_nodes, fetch_all_edges
 from .text_processor import TextProcessor
-from ..utils.locale import t
+from ..utils.locale import t, get_locale, set_locale
 
 
 @dataclass
@@ -84,10 +84,13 @@ class GraphBuilderService:
             }
         )
         
+        # Capture locale before spawning background thread
+        current_locale = get_locale()
+
         # 在后台线程中执行构建
         thread = threading.Thread(
             target=self._build_graph_worker,
-            args=(task_id, text, ontology, graph_name, chunk_size, chunk_overlap, batch_size)
+            args=(task_id, text, ontology, graph_name, chunk_size, chunk_overlap, batch_size, current_locale)
         )
         thread.daemon = True
         thread.start()
@@ -102,9 +105,11 @@ class GraphBuilderService:
         graph_name: str,
         chunk_size: int,
         chunk_overlap: int,
-        batch_size: int
+        batch_size: int,
+        locale: str = 'zh'
     ):
         """图谱构建工作线程"""
+        set_locale(locale)
         try:
             self.task_manager.update_task(
                 task_id,

@@ -1,6 +1,9 @@
 import json
 import os
+import threading
 from flask import request, has_request_context
+
+_thread_local = threading.local()
 
 _locales_dir = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'locales')
 
@@ -17,10 +20,15 @@ for filename in os.listdir(_locales_dir):
             _translations[locale_name] = json.load(f)
 
 
+def set_locale(locale: str):
+    """Set locale for current thread. Call at the start of background threads."""
+    _thread_local.locale = locale
+
+
 def get_locale() -> str:
     if has_request_context():
         return request.headers.get('Accept-Language', 'zh')
-    return 'zh'
+    return getattr(_thread_local, 'locale', 'zh')
 
 
 def t(key: str, **kwargs) -> str:

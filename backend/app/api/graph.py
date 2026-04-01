@@ -15,7 +15,7 @@ from ..services.graph_builder import GraphBuilderService
 from ..services.text_processor import TextProcessor
 from ..utils.file_parser import FileParser
 from ..utils.logger import get_logger
-from ..utils.locale import t
+from ..utils.locale import t, get_locale, set_locale
 from ..models.task import TaskManager, TaskStatus
 from ..models.project import ProjectManager, ProjectStatus
 
@@ -371,8 +371,12 @@ def build_graph():
         project.graph_build_task_id = task_id
         ProjectManager.save_project(project)
         
+        # Capture locale before spawning background thread
+        current_locale = get_locale()
+
         # 启动后台任务
         def build_task():
+            set_locale(current_locale)
             build_logger = get_logger('mirofish.build')
             try:
                 build_logger.info(f"[{task_id}] 开始构建图谱...")

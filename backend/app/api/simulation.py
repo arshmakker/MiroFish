@@ -14,7 +14,7 @@ from ..services.oasis_profile_generator import OasisProfileGenerator
 from ..services.simulation_manager import SimulationManager, SimulationStatus
 from ..services.simulation_runner import SimulationRunner, RunnerStatus
 from ..utils.logger import get_logger
-from ..utils.locale import t
+from ..utils.locale import t, get_locale, set_locale
 from ..models.project import ProjectManager
 
 logger = get_logger('mirofish.api.simulation')
@@ -501,8 +501,12 @@ def prepare_simulation():
         state.status = SimulationStatus.PREPARING
         manager._save_simulation_state(state)
         
+        # Capture locale before spawning background thread
+        current_locale = get_locale()
+
         # 定义后台任务
         def run_prepare():
+            set_locale(current_locale)
             try:
                 task_manager.update_task(
                     task_id,
